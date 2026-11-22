@@ -158,7 +158,7 @@ function verdict() {
       <ul>
         <li><b>Why:</b> that bot did the proof-of-work and reported believable behaviour (mouse movement, key presses, a sensible time on the page). FastFlare cannot see inside a browser, so behaviour it is told about is evidence, not proof.</li>
         <li><b>What it cost the bot:</b> about ${avgBits(b.bits)} bits of proof-of-work per token, plus a human-paced delay each time. That caps how many tokens one machine can mint, but it does not stop a single patient one.</li>
-        <li><b>What helps:</b> raise <code>FF_CAPTCHA_BITS</code>, rate-limit the action the token protects (sign-up, login, posting), and watch for many tokens from one network. A CAPTCHA should be one layer, not the only one.</li>
+        <li><b>What helps:</b> lower <code>FF_QUOTA_SOFT</code> and <code>FF_QUOTA_HARD</code> (tokens one network may get in 10 minutes), raise <code>FF_CAPTCHA_BITS</code>, and rate-limit the action the token protects (sign-up, login, posting). A CAPTCHA should be one layer, not the only one.</li>
       </ul>`;
   } else if (b.sent && passRate <= 0.1) {
     v.className = 'card verdict hold';
@@ -168,7 +168,9 @@ function verdict() {
   } else {
     v.className = 'card verdict';
     v.innerHTML = `<h2>Mixed result.</h2>
-      <p>FastFlare stopped <b>${caught1} of ${a.sent}</b> sloppy requests. Of the human-like ones, <b>${b.passed}</b> got through, <b>${b.stepup}</b> were challenged and <b>${b.blocked}</b> were blocked out of ${b.sent}.</p>`;
+      <p>FastFlare stopped <b>${caught1} of ${a.sent}</b> sloppy requests. Of the human-like ones, <b>${b.passed}</b> got through, <b>${b.stepup}</b> were challenged and <b>${b.blocked}</b> were blocked out of ${b.sent}.</p>
+      <ul><li>The first few look like a person and pass. After that FastFlare notices one network collecting too many tokens, makes each harder, then stops issuing them (<code>too_many_tokens</code> in the log).</li>
+      <li>A bot that waits long enough between requests, or rotates addresses, slips under this limit. Tune <code>FF_QUOTA_SOFT</code> / <code>FF_QUOTA_HARD</code> on your server.</li></ul>`;
   }
   v.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
