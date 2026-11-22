@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FF-Test · Attack lab for FastFlare</title>
+<meta name="description" content="Throw 100 sloppy bots and then patient human-like bots at a FastFlare server and see what gets through.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stars" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="brand">FF<span>·</span>Test</div>
+  <div class="tag">Attack lab for FastFlare</div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Can FastFlare tell a <em>bot</em> from a <em>person</em>?</h1>
+    <p>Press attack. First, 100 sloppy bots fire at the CAPTCHA at random. Then a patient bot starts sending requests that look like a real visitor, one at a time, to see whether FastFlare spots it or lets it through.</p>
+  </section>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <div class="two">
+    <section class="card" aria-labelledby="t-target">
+      <h2 id="t-target">Target</h2>
+      <label for="api">FastFlare server</label>
+      <input id="api" type="url" spellcheck="false" autocomplete="off">
+      <div class="row">
+        <div><label for="sitekey">Site key</label><input id="sitekey" spellcheck="false" autocomplete="off"></div>
+        <div><label for="pace">Human-like pace</label>
+          <select id="pace">
+            <option value="slow">Slow (3–7 s apart)</option>
+            <option value="normal">Normal (1–2.5 s)</option>
+            <option value="burst">Burst (no pause)</option>
+          </select>
+        </div>
+        <div><label for="count">Human-like requests</label><input id="count" type="number" min="5" max="100" value="25"></div>
+      </div>
+      <div class="actions">
+        <button id="launch" class="btn attack" disabled>Attack</button>
+        <button id="stop" class="btn ghost" hidden>Stop</button>
+        <button id="apply" class="btn ghost">Save server</button>
+      </div>
+      <p class="fine">Only point this at a FastFlare server you own. It sends a few hundred requests to the CAPTCHA endpoints.</p>
+      <p id="status" class="status" role="status" aria-live="polite">Loading FastFlare…</p>
+    </section>
+
+    <section class="card" aria-labelledby="t-human">
+      <h2 id="t-human">A real visitor</h2>
+      <p class="muted">This is the actual FastFlare widget. It should verify you without any puzzle.</p>
+      <div id="widget" class="ff-captcha"></div>
+      <p id="token" class="token" hidden></p>
+    </section>
+  </div>
+
+  <section class="board">
+    <div class="phase" id="ph1">
+      <div class="ph-head"><h3><span class="num">1</span> Sloppy bots</h3><span class="ph-sub">100 random attacks</span></div>
+      <div class="counters">
+        <div class="ctr"><b id="p1-sent">0</b><span>sent</span></div>
+        <div class="ctr blocked"><b id="p1-blocked">0</b><span>blocked</span></div>
+        <div class="ctr stepup"><b id="p1-stepup">0</b><span>challenged</span></div>
+        <div class="ctr passed"><b id="p1-passed">0</b><span>let through</span></div>
+      </div>
+      <div class="dots" id="dots1"></div>
+    </div>
+
+    <div class="phase" id="ph2">
+      <div class="ph-head"><h3><span class="num">2</span> Human-like bot</h3><span class="ph-sub">does everything a visitor's browser does</span></div>
+      <div class="counters">
+        <div class="ctr"><b id="p2-sent">0</b><span>sent</span></div>
+        <div class="ctr blocked"><b id="p2-blocked">0</b><span>blocked</span></div>
+        <div class="ctr stepup"><b id="p2-stepup">0</b><span>challenged</span></div>
+        <div class="ctr passed"><b id="p2-passed">0</b><span>let through</span></div>
+      </div>
+      <div class="dots" id="dots2"></div>
+    </div>
+  </section>
+
+  <div class="legend">
+    <span><i class="dot blocked"></i>blocked</span>
+    <span><i class="dot stepup"></i>challenged with harder proof-of-work</span>
+    <span><i class="dot passed"></i>let through (treated as human)</span>
+  </div>
+
+  <section id="verdict" class="card verdict" hidden></section>
+
+  <div class="two">
+    <section class="card">
+      <h2>Work the bot had to do</h2>
+      <p class="muted">Proof-of-work difficulty per request, in bits. Each extra bit doubles the CPU needed to get a token. It climbs while requests come fast.</p>
+      <canvas id="chart" height="200"></canvas>
+    </section>
+    <section class="card">
+      <h2>Live log</h2>
+      <table class="log">
+        <thead><tr><th>#</th><th>Attack</th><th>Result</th></tr></thead>
+        <tbody id="log"></tbody>
+      </table>
+    </section>
+  </div>
+</main>
+
+<footer>FF-Test · built for <a href="https://github.com/ArthWarrior3201/FastFlare">FastFlare</a></footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

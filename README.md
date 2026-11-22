@@ -1,0 +1,22 @@
+# FF-Test
+
+An attack lab for [FastFlare](https://github.com/ArthWarrior3201/FastFlare)'s CAPTCHA.
+
+1. **100 sloppy bots** fire at random: no proof-of-work, forged challenges, headless browsers, a filled honeypot, scripted mouse paths, invented time-on-page, replayed challenges.
+2. **A patient human-like bot** then does everything a visitor's browser does (solves the proof-of-work, waits, reports believable mouse/keyboard activity) at a slow pace, to see whether FastFlare lets it through.
+
+The page shows live counters, a dot per request, the proof-of-work difficulty the bot had to pay, a log, and a verdict. The real FastFlare widget is on the page too.
+
+## Use it
+
+Open the site (GitHub Pages: Settings → Pages → Deploy from branch → `main` / root), enter your FastFlare server address and press **Attack**.
+
+- The page is HTTPS, so your FastFlare server must be HTTPS too. On your server run `deploy/enable-https.sh` from the FastFlare repo; it gives you `https://<ip-with-dashes>.sslip.io`.
+- Site key `ff_demo_site` works on a server with no `config/sites.json`.
+- Only test servers you own.
+
+Command line, no browser:
+
+```sh
+node scripts/simulate.mjs https://your-fastflare-host ff_demo_site 100 15 burst
+```
