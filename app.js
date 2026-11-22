@@ -9,7 +9,10 @@ const store = {
 };
 
 let api = (params.get('api') || store.get('fftest-api') || DEFAULT_API).replace(/\/$/, '');
-const sitekey = params.get('sitekey') || store.get('fftest-sitekey') || 'ff_demo_site';
+const DEFAULT_SITEKEY = 'ff_site_main';
+// Browsers that saved the old demo key fall back to the new default.
+const savedKey = store.get('fftest-sitekey');
+const sitekey = params.get('sitekey') || (savedKey && savedKey !== 'ff_demo_site' ? savedKey : null) || DEFAULT_SITEKEY;
 $('api').value = api;
 $('sitekey').value = sitekey;
 
@@ -31,7 +34,7 @@ $('apply').onclick = () => {
   const v = $('api').value.trim().replace(/\/$/, '');
   if (!/^https?:\/\//.test(v)) return status('Enter the server address starting with https://', true);
   store.set('fftest-api', v);
-  store.set('fftest-sitekey', $('sitekey').value.trim() || 'ff_demo_site');
+  store.set('fftest-sitekey', $('sitekey').value.trim() || DEFAULT_SITEKEY);
   location.href = location.pathname;
 };
 

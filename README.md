@@ -14,11 +14,11 @@ The attack page shows live counters, a dot per request, the proof-of-work diffic
 Open the site (GitHub Pages: Settings → Pages → Deploy from branch → `main` / root), enter your FastFlare server address and press **Attack**.
 
 - The page is HTTPS, so your FastFlare server must be HTTPS too. On your server run `deploy/enable-https.sh` from the FastFlare repo; it gives you `https://<ip-with-dashes>.sslip.io`.
-- Site key `ff_demo_site` works on a server with no `config/sites.json`.
+- The default site key is `ff_site_main`. Change it in the Site key field if your server's `config/sites.json` uses another name (`ff_demo_site` works only on a server with no `config/sites.json`).
 - Only test servers you own.
 
 Command line, no browser:
 
 ```sh
-node scripts/simulate.mjs https://your-fastflare-host ff_demo_site 100 15 burst
+node scripts/simulate.mjs https://your-fastflare-host ff_site_main 100 15 burst
 ```
