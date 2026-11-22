@@ -18,7 +18,7 @@
 <main>
   <section class="hero">
     <h1>Can FastFlare tell a <em>bot</em> from a <em>person</em>?</h1>
-    <p>Press attack. First, 100 sloppy bots fire at the CAPTCHA at random. Then a patient bot starts sending requests that look like a real visitor, one at a time, to see whether FastFlare spots it or lets it through.</p>
+    <p>Press attack. First, 100 sloppy bots fire at the CAPTCHA at random. Then a patient bot imitates a real visitor, with believable signals and a faked curved mouse path, and tries the puzzle if it gets one. See what FastFlare catches.</p>
   </section>
 
   <div id="banner" class="banner" hidden></div>
@@ -50,7 +50,7 @@
 
     <section class="card" aria-labelledby="t-human">
       <h2 id="t-human">A real visitor</h2>
-      <p class="muted">This is the actual FastFlare widget. It should verify you without any puzzle.</p>
+      <p class="muted">This is the actual FastFlare widget. Move your mouse a little and it verifies you; if it is unsure it shows a quick puzzle.</p>
       <div id="widget" class="ff-captcha"></div>
       <p id="token" class="token" hidden></p>
     </section>
@@ -82,7 +82,7 @@
 
   <div class="legend">
     <span><i class="dot blocked"></i>blocked</span>
-    <span><i class="dot stepup"></i>challenged with harder proof-of-work</span>
+    <span><i class="dot stepup"></i>given a puzzle it could not solve</span>
     <span><i class="dot passed"></i>let through (treated as human)</span>
   </div>
 
@@ -91,7 +91,7 @@
   <div class="two">
     <section class="card">
       <h2>Work the bot had to do</h2>
-      <p class="muted">Proof-of-work difficulty per request, in bits. Each extra bit doubles the CPU needed to get a token. It climbs while requests come fast.</p>
+      <p class="muted">Proof-of-work difficulty per request, in bits. Each extra bit doubles the CPU a bot needs. It climbs while requests come fast.</p>
       <canvas id="chart" height="200"></canvas>
     </section>
     <section class="card">

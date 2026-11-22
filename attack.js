@@ -31,6 +31,55 @@ export function humanSignals(dt) {
   };
 }
 
+const gauss = () => {
+  let u = 0, v = 0;
+  while (!u) u = Math.random();
+  while (!v) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+};
+const bez = (a, b, c, d, s) => (1 - s) ** 3 * a + 3 * (1 - s) ** 2 * s * b + 3 * (1 - s) * s * s * c + s ** 3 * d;
+const ease = (s) => (s < 0.5 ? 2 * s * s : 1 - (-2 * s + 2) ** 2 / 2);
+
+/**
+ * A believable fake mouse recording, the way bot toolkits make one: several curved strokes with
+ * acceleration, braking, jitter and pauses, sampled at display rate with timer noise.
+ */
+export function synthTrace(ms) {
+  const pts = [];
+  let x = rand(150, 900), y = rand(150, 600), t = 0;
+  while (t < ms) {
+    const tx = x + rand(-380, 380), ty = y + rand(-240, 240);
+    const c1 = [x + rand(-160, 160), y + rand(-160, 160)];
+    const c2 = [tx + rand(-160, 160), ty + rand(-160, 160)];
+    const steps = Math.max(8, Math.round(rand(260, 900) / 16.7));
+    for (let i = 1; i <= steps && t < ms; i++) {
+      const k = ease(i / steps);
+      t += 16.7 + (Math.random() - 0.5) * 1.2;
+      pts.push([Math.round(bez(x, c1[0], c2[0], tx, k) + gauss() * 0.8), Math.round(bez(y, c1[1], c2[1], ty, k) + gauss() * 0.8), Math.round(t * 10) / 10]);
+    }
+    x = tx;
+    y = ty;
+    t += rand(60, 500);
+  }
+  return pts.slice(-200);
+}
+
+/** A believable drag of the puzzle handle to `dx` pixels. */
+export function synthDrag(dx) {
+  const pts = [];
+  const steps = rand(18, 45);
+  const x0 = rand(400, 700), y0 = rand(380, 520);
+  let t = 0;
+  for (let i = 0; i <= steps; i++) {
+    t += 14 + Math.random() * 8;
+    pts.push([Math.round(x0 + ease(i / steps) * dx + gauss()), Math.round(y0 + gauss() * 1.5), Math.round(t)]);
+  }
+  return pts;
+}
+
+// What cheap scripts send: a perfectly straight line at constant speed on a fixed timer.
+const linearTrace = () => Array.from({ length: 40 }, (_, i) => [200 + i * 9, 300 + i * 2, i * 16]);
+
 const BOT_PRESETS = {
   headless: () => ({ wd: true, lg: 0, sw: 0, sh: 0, hc: 0, pm: 0, kd: 0, tc: 0, sc: 0, fc: 0, pv: 0, dt: 40 }),
   empty: () => ({}),
@@ -38,7 +87,7 @@ const BOT_PRESETS = {
   fabricated: () => humanSignals(rand(15000, 90000)), // claims a long visit that never happened
 };
 
-export function createAttacker({ api, sitekey, pow, signal, onEvent = () => {}, maxSolveBits = 23 }) {
+export function createAttacker({ api, sitekey, pow, signal, onEvent = () => {}, maxSolveBits = 23, headers = {} }) {
   api = api.replace(/\/$/, '');
 
   async function post(path, body) {
@@ -46,7 +95,7 @@ export function createAttacker({ api, sitekey, pow, signal, onEvent = () => {}, 
     try {
       const r = await fetch(api + path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...headers },
         body: JSON.stringify(body),
         signal,
       });
@@ -80,8 +129,8 @@ export function createAttacker({ api, sitekey, pow, signal, onEvent = () => {}, 
     post('/captcha/verify', { sitekey, challenge: ch, nonce, signals, hp: '', ...extra });
 
   function classify(res) {
-    if (res.status === 200 && res.json.ok) return { outcome: 'passed', reason: `token (score ${res.json.score})` };
-    if (res.status === 200 && res.json.retry) return { outcome: 'stepup', reason: 'harder proof-of-work demanded' };
+    if (res.status === 200 && res.json.ok) return { outcome: 'passed', reason: `token (${res.json.method || 'invisible'})` };
+    if (res.status === 200 && res.json.puzzle) return { outcome: 'stepup', reason: `puzzle demanded (${res.json.reason || 'not sure'})` };
     return { outcome: 'blocked', reason: res.json.error || `HTTP ${res.status}` };
   }
 
@@ -131,7 +180,7 @@ export function createAttacker({ api, sitekey, pow, signal, onEvent = () => {}, 
       const { ch, res } = await getChallenge();
       if (!ch) return { res, bits: 0 };
       const nonce = (await solve(ch)) ?? '0';
-      return { res: await verify(ch, nonce, BOT_PRESETS.straightMouse()), bits: ch.difficulty };
+      return { res: await verify(ch, nonce, BOT_PRESETS.straightMouse(), { trace: linearTrace() }), bits: ch.difficulty };
     }],
     ['Solved PoW, invented time on page', async () => {
       const { ch, res } = await getChallenge();
@@ -164,24 +213,29 @@ export function createAttacker({ api, sitekey, pow, signal, onEvent = () => {}, 
   }
 
   // ---- Phase 2: a bot that does everything a person's browser does --------------------------------
+  // Solves the proof-of-work, waits like a reader, sends believable signals and a synthesised curved
+  // mouse path. If asked for the puzzle it drags convincingly, but it cannot see the picture, so it
+  // has to guess where the hole is.
   async function humanLikeBot(i) {
     const t0 = now();
     const { ch, res } = await getChallenge();
     if (!ch) return onEvent({ phase: 2, i, kind: 'Human-like bot', bits: 0, status: res.status, ms: res.ms, ...classify(res) });
     const nonce = (await solve(ch)) ?? '0';
-    await sleep(rand(1200, 3400), signal); // "reads the page", moves the mouse
-    let r = await verify(ch, nonce, humanSignals(now() - t0));
-    let bits = ch.difficulty;
-    let stepped = false;
-    if (r.status === 200 && r.json.retry) {
-      stepped = true;
-      const ch2 = r.json.challenge;
-      bits = ch2.difficulty;
-      const nonce2 = (await solve(ch2)) ?? '0';
-      await sleep(rand(300, 900), signal);
-      r = await verify(ch2, nonce2, humanSignals(now() - t0));
+    await sleep(rand(1200, 3400), signal);
+    const dwell = now() - t0;
+    let r = await verify(ch, nonce, humanSignals(dwell), { trace: synthTrace(Math.max(400, Math.min(dwell - 300, 2500))) });
+    let puzzles = 0;
+    while (r.status === 200 && r.json.puzzle && puzzles < 3) {
+      puzzles++;
+      const pz = r.json.puzzle;
+      const guess = rand(0, pz.width - pz.size);
+      await sleep(rand(1500, 3200), signal);
+      r = await post('/captcha/puzzle', { sitekey, id: pz.id, x: guess, trace: synthDrag(guess) });
     }
-    onEvent({ phase: 2, i, kind: 'Human-like bot', bits, stepped, ms: now() - t0, status: r.status, ...classify(r) });
+    let c = classify(r);
+    if (puzzles && c.outcome !== 'passed') c = { outcome: 'stepup', reason: `got a puzzle, could not solve it (${r.json.error || 'failed'})` };
+    if (c.outcome === 'blocked' && (r.json.error === 'too_many_failures' || r.json.error === 'too_many_tokens')) c.reason = `network blocked (${r.json.error})`;
+    onEvent({ phase: 2, i, kind: 'Human-like bot', bits: ch.difficulty, stepped: puzzles > 0, ms: now() - t0, status: r.status, ...c });
   }
 
   const PACE = { slow: [3000, 7000], normal: [1000, 2500], burst: [0, 0] };

@@ -146,32 +146,19 @@ window.addEventListener('resize', drawChart);
 function verdict() {
   const a = stats[1], b = stats[2];
   const v = $('verdict');
+  const pct = (n, d) => (d ? Math.round((n / d) * 100) : 0);
   const caught1 = a.blocked + a.stepup;
-  const passRate = b.sent ? b.passed / b.sent : 0;
-  const avgBits = (arr) => (arr.length ? (arr.reduce((x, y) => x + y, 0) / arr.length).toFixed(1) : '–');
+  const caught2 = b.blocked + b.stepup;
   v.hidden = false;
-
-  if (b.sent && passRate >= 0.5) {
-    v.className = 'card verdict fail';
-    v.innerHTML = `<h2>The patient bot got through.</h2>
-      <p>FastFlare stopped <b>${caught1} of ${a.sent}</b> sloppy requests (${a.passed} got through), but treated <b>${b.passed} of ${b.sent}</b> human-like requests as people.</p>
-      <ul>
-        <li><b>Why:</b> that bot did the proof-of-work and reported believable behaviour (mouse movement, key presses, a sensible time on the page). FastFlare cannot see inside a browser, so behaviour it is told about is evidence, not proof.</li>
-        <li><b>What it cost the bot:</b> about ${avgBits(b.bits)} bits of proof-of-work per token, plus a human-paced delay each time. That caps how many tokens one machine can mint, but it does not stop a single patient one.</li>
-        <li><b>What helps:</b> lower <code>FF_QUOTA_SOFT</code> and <code>FF_QUOTA_HARD</code> (tokens one network may get in 10 minutes), raise <code>FF_CAPTCHA_BITS</code>, and rate-limit the action the token protects (sign-up, login, posting). A CAPTCHA should be one layer, not the only one.</li>
-      </ul>`;
-  } else if (b.sent && passRate <= 0.1) {
-    v.className = 'card verdict hold';
-    v.innerHTML = `<h2>FastFlare held.</h2>
-      <p>It stopped <b>${caught1} of ${a.sent}</b> sloppy requests and only <b>${b.passed} of ${b.sent}</b> of the human-like ones got through.</p>
-      <ul><li>Average proof-of-work paid by the patient bot: ${avgBits(b.bits)} bits per request.</li></ul>`;
-  } else {
-    v.className = 'card verdict';
-    v.innerHTML = `<h2>Mixed result.</h2>
-      <p>FastFlare stopped <b>${caught1} of ${a.sent}</b> sloppy requests. Of the human-like ones, <b>${b.passed}</b> got through, <b>${b.stepup}</b> were challenged and <b>${b.blocked}</b> were blocked out of ${b.sent}.</p>
-      <ul><li>The first few look like a person and pass. After that FastFlare notices one network collecting too many tokens, makes each harder, then stops issuing them (<code>too_many_tokens</code> in the log).</li>
-      <li>A bot that waits long enough between requests, or rotates addresses, slips under this limit. Tune <code>FF_QUOTA_SOFT</code> / <code>FF_QUOTA_HARD</code> on your server.</li></ul>`;
-  }
+  v.className = 'card verdict ' + (pct(caught2, b.sent) >= 90 && a.passed === 0 ? 'hold' : 'fail');
+  v.innerHTML = `<h2>FastFlare stopped ${pct(caught1 + caught2, a.sent + b.sent)}% of the attack.</h2>
+    <p>Sloppy bots: <b>${caught1} of ${a.sent}</b> stopped (${a.passed} let through). Human-like bot: <b>${caught2} of ${b.sent}</b> stopped (${b.passed} let through).</p>
+    <ul>
+      <li><b>How:</b> cheap tricks are blocked outright. Anything FastFlare is unsure about gets a picture puzzle, and the hole's position is only in the picture, so a script calling the API has to guess. Three wrong answers block the network for 10 minutes.</li>
+      <li><b>What still got through:</b> the human-like bot fakes a curved, accelerating mouse path that looks real, so its first request can pass without a puzzle (one per network per 10 minutes). After that it occasionally guesses a puzzle right by luck (about 1 in 25 guesses).</li>
+      <li><b>Not tested here:</b> bots that read the picture with computer vision, and puzzle farms where paid people solve it remotely. Both can pass the puzzle; per-network limits and rate limits on what the token protects are what slow them down.</li>
+      <li><b>Note:</b> the attack runs from your own network, so the real widget on this page may say "too many attempts" for about 10 minutes afterwards.</li>
+    </ul>`;
   v.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 

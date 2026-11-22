@@ -15,6 +15,8 @@ const reasons = {};
 const bits = { 1: [], 2: [] };
 const attacker = createAttacker({
   api, sitekey, pow,
+  // Browsers send their own User-Agent; a script has to pretend.
+  headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36' },
   onEvent: (e) => {
     if (e.type === 'phase') return console.log(`\nPhase ${e.phase}: ${e.total} requests`);
     if (e.type === 'done') return;
