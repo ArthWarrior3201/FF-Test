@@ -15,11 +15,6 @@
   <div class="tag">Attack lab for FastFlare</div>
 </header>
 
-<nav class="tabs" role="tablist" aria-label="FF-Test tools">
-  <button role="tab" id="tb-attack" aria-controls="tab-attack" aria-selected="true">Attack Lab</button>
-  <button role="tab" id="tb-speed" aria-controls="tab-speed" aria-selected="false">Speed Test</button>
-</nav>
-
 <main>
 <div id="tab-attack" role="tabpanel" aria-labelledby="tb-attack">
   <section class="hero">
@@ -110,52 +105,9 @@
   </div>
 </div>
 
-<div id="tab-speed" role="tabpanel" aria-labelledby="tb-speed" hidden>
-  <section class="hero">
-    <h1>How fast is your line to <em>FastFlare</em>?</h1>
-    <p>Pick a provider, then a city it has a server in. The test measures latency and jitter, then download and upload for 10 seconds each, including how much your latency rises while the line is busy.</p>
-  </section>
-
-  <section class="card">
-    <div class="row">
-      <div><label for="sp-provider">Provider</label><select id="sp-provider" disabled></select></div>
-      <div><label for="sp-city">City</label><select id="sp-city" disabled></select></div>
-      <div class="go"><button id="sp-start" class="btn attack" disabled>Start test</button><button id="sp-stop" class="btn ghost" hidden>Stop</button></div>
-    </div>
-    <div class="live">
-      <div class="live-num"><span id="sp-live">–</span><small id="sp-unit">Mbps</small></div>
-      <div class="live-side">
-        <div id="sp-phase" class="phase-label">Ready</div>
-        <div class="bar"><i id="sp-bar"></i></div>
-        <p id="sp-status" class="status" role="status" aria-live="polite">Loading servers…</p>
-      </div>
-    </div>
-  </section>
-
-  <div class="tiles">
-    <div class="tile"><span>Download</span><b id="r-dl">–</b><em>Mbps</em></div>
-    <div class="tile"><span>Upload</span><b id="r-ul">–</b><em>Mbps</em></div>
-    <div class="tile"><span>Latency</span><b id="r-lat">–</b><em>ms idle</em></div>
-    <div class="tile"><span>Jitter</span><b id="r-jit">–</b><em>ms</em></div>
-    <div class="tile"><span>Latency while downloading</span><b id="r-ldl">–</b><em>ms</em></div>
-    <div class="tile"><span>Latency while uploading</span><b id="r-lul">–</b><em>ms</em></div>
-    <div class="tile"><span>Packet loss</span><b id="r-loss">–</b><em>%</em></div>
-  </div>
-
-  <div class="two">
-    <section class="card"><h2>Download over time</h2><canvas id="c-dl" height="190"></canvas></section>
-    <section class="card"><h2>Upload over time</h2><canvas id="c-ul" height="190"></canvas></section>
-  </div>
-  <div class="two">
-    <section class="card"><h2>Latency per ping</h2><canvas id="c-ping" height="190"></canvas></section>
-    <section class="card"><h2>Latency: idle vs under load</h2><canvas id="c-load" height="190"></canvas></section>
-  </div>
-  <p class="fine">Results can only go as high as the test server's own connection. Oracle's free micro servers are limited to roughly 50 Mbps, so faster lines read about 50 against them.</p>
-</div>
 </main>
 
 <footer>FF-Test · built for <a href="https://github.com/ArthWarrior3201/FastFlare">FastFlare</a></footer>
 <script type="module" src="app.js"></script>
-<script type="module" src="speed.js"></script>
 </body>
 </html>

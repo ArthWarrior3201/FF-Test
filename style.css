@@ -96,25 +96,3 @@ table.log { width: 100%; border-collapse: collapse; font-size: 13px; }
 .log td { padding: 6px 8px; border-bottom: 1px solid rgba(36, 42, 85, .6); vertical-align: top; }
 .log .r-blocked { color: #a590ff; } .log .r-stepup { color: var(--stepup); } .log .r-passed { color: var(--passed); font-weight: 700; }
 footer { position: relative; text-align: center; color: var(--muted); padding: 26px; font-size: 14px; border-top: 1px solid var(--line); }
-
-/* Tabs */
-.tabs { position: relative; display: flex; gap: 6px; justify-content: center; padding: 14px 16px 0; }
-.tabs button { font: inherit; font-weight: 600; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 9px 20px; cursor: pointer; }
-.tabs button[aria-selected=true] { color: #1a0d05; background: linear-gradient(90deg, var(--flare), var(--pink)); border-color: transparent; }
-.tabs button:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
-
-/* Speed test */
-.go { display: flex; gap: 8px; align-items: end; }
-.go .btn { width: 100%; }
-.live { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; margin-top: 22px; }
-.live-num { font-size: clamp(54px, 9vw, 84px); font-weight: 800; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; background: linear-gradient(90deg, var(--flare), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; min-width: 3.2ch; }
-.live-num small { font-size: 18px; margin-left: 6px; color: var(--muted); -webkit-text-fill-color: var(--muted); font-weight: 600; letter-spacing: 0; }
-.live-side { flex: 1; min-width: 220px; }
-.phase-label { font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 13px; color: var(--muted); }
-.bar { height: 8px; border-radius: 4px; background: #0a0d26; border: 1px solid var(--line); overflow: hidden; margin: 10px 0 4px; }
-.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--flare), var(--pink)); transition: width .2s linear; }
-.tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 22px 0; }
-.tile { background: linear-gradient(180deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
-.tile span { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; min-height: 2.4em; }
-.tile b { display: block; font-size: 32px; letter-spacing: -.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.tile em { font-style: normal; color: var(--muted); font-size: 13px; }

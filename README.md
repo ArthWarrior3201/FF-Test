@@ -5,7 +5,6 @@ An attack lab for [FastFlare](https://github.com/ArthWarrior3201/FastFlare)'s CA
 1. **100 sloppy bots** fire at random: no proof-of-work, forged challenges, headless browsers, a filled honeypot, scripted mouse paths, invented time-on-page, replayed challenges.
 2. **A patient human-like bot** then does everything a visitor's browser does (solves the proof-of-work, waits, reports believable signals and a synthesised curved mouse path) and attempts the puzzle if it is given one, guessing because it cannot see the picture.
 
-There is also a **Speed test** tab: pick a provider and city, then measure latency, jitter, download, upload and latency under load against that FastFlare server.
 
 The attack page shows live counters, a dot per request, the proof-of-work difficulty the bot had to pay, a log, and a verdict. The real FastFlare widget is on the page too.
 
